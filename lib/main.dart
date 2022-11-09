@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Program Counter'),
     );
   }
 }
@@ -103,14 +103,19 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              // if counter % 2 == 0, display "GANJIL" with text color red.
-              // else, display "GENAP" with text color blue.
-              _counter % 2 == 0 ? "GENAP" : "GANJIL",
-              style: TextStyle(
-                color: _counter % 2 == 0 ? Colors.red : Colors.blue,
-              ),
-            ),
+            _counter % 2 == 0
+                ? const Text(
+                    // if counter % 2 == 0, display "GANJIL" with text color red.
+                    // else, display "GENAP" with text color blue.
+                    "GENAP",
+                    style: TextStyle(
+                      color: Colors.red,
+                    ),
+                  )
+                : const Text(
+                    "GANJIL",
+                    style: TextStyle(color: Colors.blue),
+                  ),
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
