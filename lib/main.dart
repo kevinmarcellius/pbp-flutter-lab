@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:counter_7/drawer.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,13 +25,13 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Program Counter'),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({super.key});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -41,7 +42,7 @@ class MyHomePage extends StatefulWidget {
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
 
-  final String title;
+  final String title = 'Flutter Demo Home Page';
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -83,6 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
+      drawer: const AppDrawer(),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
@@ -103,19 +105,14 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            _counter % 2 == 0
-                ? const Text(
-                    // if counter % 2 == 0, display "GANJIL" with text color red.
-                    // else, display "GENAP" with text color blue.
-                    "GENAP",
-                    style: TextStyle(
-                      color: Colors.red,
-                    ),
-                  )
-                : const Text(
-                    "GANJIL",
-                    style: TextStyle(color: Colors.blue),
-                  ),
+            Text(
+              // if counter % 2 == 0, display "GANJIL" with text color red.
+              // else, display "GENAP" with text color blue.
+              _counter % 2 == 0 ? "GENAP" : "GANJIL",
+              style: TextStyle(
+                color: _counter % 2 == 0 ? Colors.red : Colors.blue,
+              ),
+            ),
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
