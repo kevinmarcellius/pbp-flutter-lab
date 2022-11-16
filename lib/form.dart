@@ -149,55 +149,52 @@ class _MyFormPageState extends State<MyFormPage> {
                     },
                   ),
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: TextButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.blue),
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        budgets.add(Budget(_judul, nominal, jenis, tanggal));
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return Dialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              elevation: 15,
-                              child: Container(
-                                child: ListView(
-                                  padding: const EdgeInsets.only(
-                                      top: 20, bottom: 20),
-                                  shrinkWrap: true,
-                                  children: <Widget>[
-                                    Center(child: const Text('Success')),
-                                    SizedBox(height: 20),
-                                    // Munculkan informasi yang didapat dari form
-                                    Center(
-                                        child: Text(
-                                            "Berhasil menambahkan budget")),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: Text('Kembali'),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      }
-                    },
-                    child: const Text(
-                      "Simpan",
-                      style: TextStyle(color: Colors.white),
-                    ),
+                TextButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.blue),
                   ),
-                )
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      budgets.add(Budget(_judul, nominal, jenis, tanggal));
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return Dialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 15,
+                            child: Container(
+                              child: ListView(
+                                padding:
+                                    const EdgeInsets.only(top: 20, bottom: 20),
+                                shrinkWrap: true,
+                                children: <Widget>[
+                                  Center(child: const Text('Success')),
+                                  SizedBox(height: 20),
+                                  // Munculkan informasi yang didapat dari form
+                                  Center(
+                                      child:
+                                          Text("Berhasil menambahkan budget")),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text('Kembali'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }
+                  },
+                  child: const Text(
+                    "Simpan",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
               ],
             ),
           ),
