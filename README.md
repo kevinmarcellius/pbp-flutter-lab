@@ -2,6 +2,7 @@
 
 - [Tugas 7](#tugas-7)
 - [Tugas 8](#tugas-8)
+- [Tugas 9](#tugas-9)
 
 ## Tugas 7
 
@@ -439,6 +440,296 @@ class ShowBudgetPage extends StatelessWidget {
 }
 ``` 
 
+## Tugas 9
+
+1. Apakah bisa kita melakukan pengambilan data JSON tanpa membuat model terlebih dahulu? Jika iya, apakah hal tersebut lebih baik daripada membuat model sebelum melakukan pengambilan data JSON? <br>
+Ya, kita bisa mengambil data JSON manual tanpa membuat objek terlebih dahulu. Namun, menurut saya, lebih baik membuat model dulu sebelum melakukan pengambilan data JSON. Karena kita bisa mengetahui apabila ada error seperti missing fields sebelum compile.<br>
+
+2. Sebutkan widget apa saja yang kamu pakai di proyek kali ini dan jelaskan fungsinya.
+- Column : Menyusun widget secara vertikal
+- Text :  Menampilkan teks
+- MaterialPageRoute : mengganti screen menjadi halaman/screen yang baru
+- FutureBuilder : bangun widget berdasarkan snapshot terbaru
+- GestureDetector : menentukan event apa saja dan function yang merespon pada widget child nya.
+- ChechkBox : mengubah nilai boolean dari True -> False dan sebaliknya.
+3. Jelaskan mekanisme pengambilan data dari json hingga dapat ditampilkan pada Flutter. <br>
+Pertama, import dependency `http`. Setelah itu, http request akan menghasilkan sebuah response dengan body yang berisi data dari web. Data tersebut lalu dikonversi ke model yang sudah dibuat untuk data tersebut (model bisa dibuat menggunakan web quicktype). Lalu, data tersebut ditampilkan dengan widget FutureBuilder.
+4. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas.
+- Refactor file, buat folder `model` dan `page` lalu pindahkan file sesuai tempatnya. Sehingga hasilnya seperti ini.
+```
+lib\main.dart
+lib\functions\fetch_watchlist.dart
+lib\model\budget.dart
+lib\model\mywatchlist.dart
+lib\page\form.dart
+lib\page\drawer.dart
+lib\page\mywatchlist_page.dart
+lib\page\mywatchlist_detail.dart
+lib\page\show_budget.dart
+```
+- Pada `lib\model\mywatchlist.dart` buat model mywatchlist. Gunakan quicktype, langkahnya hampir sama dengan Lab 8. 
+ - Pada `lib\functions\fetch_watchlist.dart` buat function untuk mengambil data dari web. Sebelumnya, jalankan `flutter pub add http` untuk menambahkan dependency http.
+ ```shell 
+ import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:counter_7/model/mywatchlist.dart';
+
+Future<List<MyWatchlist>> fetchWatchlist() async {
+  var url =
+      Uri.parse('https://pbp-tugas02-kevin.herokuapp.com/mywatchlist/json');
+  var response = await http.get(
+    url,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Content-Type": "application/json",
+    },
+  );
+
+  // melakukan decode response menjadi bentuk json
+  var data = jsonDecode(utf8.decode(response.bodyBytes));
+
+  // melakukan konversi data json menjadi object ToDo
+  List<MyWatchlist> listMyWatchlist = [];
+  for (var d in data) {
+    if (d != null) {
+      listMyWatchlist.add(MyWatchlist.fromJson(d));
+    }
+  }
+
+  return listMyWatchlist;
+}
+ ```
+- pada `lib\page\mywatchlist_page.dart` buat page untuk menampilkan data yang sudah diambil.
+```shell 
+import 'package:flutter/material.dart';
+import 'package:counter_7/functions/fetch_watchlist.dart';
+import 'package:counter_7/page/mywatchlist_detail_page.dart';
+import 'drawer.dart';
+
+class WatchListPage extends StatefulWidget {
+  const WatchListPage({Key? key}) : super(key: key);
+
+  @override
+  _WatchListPageState createState() => _WatchListPageState();
+}
+
+class _WatchListPageState extends State<WatchListPage> {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('My Watch List'),
+        ),
+        drawer: const AppDrawer(),
+        body: FutureBuilder(
+            future: fetchWatchlist(),
+            builder: (context, AsyncSnapshot snapshot) {
+              if (snapshot.data == null) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                if (!snapshot.hasData) {
+                  return Column(
+                    children: const [
+                      Text(
+                        "Tidak ada watchlist",
+                        style:
+                            TextStyle(color: Color(0xff59A5D8), fontSize: 20),
+                      ),
+                      SizedBox(height: 8),
+                    ],
+                  );
+                } else {
+                  return ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (_, index) => Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.all(20.0),
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(15.0),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color:
+                                          (snapshot.data![index].fields.watched)
+                                              ? Colors.green
+                                              : Colors.red,
+                                      blurRadius: 3.0)
+                                ]),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                GestureDetector(
+                                  child: Text(
+                                    "${snapshot.data![index].fields.title}",
+                                    style: const TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            MyWatchlistDetailPage(
+                                                movie: snapshot.data![index]),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                Checkbox(
+                                    value: snapshot.data![index].fields.watched,
+                                    onChanged: (bool? value) {
+                                      setState(() {
+                                        snapshot.data![index].fields.watched =
+                                            value!;
+                                      });
+                                    })
+                              ],
+                            ),
+                          ));
+                }
+              }
+            }));
+  }
+}
+
+```
+- pada `lib\page\mywatchlist_detail.dart` buat page yang menampilkan 1 film beserta detailnya.
+
+```shell
+import 'package:counter_7/model/mywatchlist.dart';
+import 'package:flutter/material.dart';
+import 'package:counter_7/page/drawer.dart';
+import 'package:flutter/services.dart';
+
+class MyWatchlistDetailPage extends StatelessWidget {
+  final MyWatchlist movie;
+
+  const MyWatchlistDetailPage({Key? key, required this.movie})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Detail'),
+      ),
+      drawer: const AppDrawer(),
+      body: Row(
+        children: <Widget>[
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                children: <Widget>[
+                  Column(
+                    children: [
+                      Text(
+                        movie.fields.title,
+                        style: const TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      ListTile(
+                        leading: const Text(
+                          'Release Date: ',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        trailing: Text(
+                          movie.fields.releaseDate,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        dense: true,
+                      ),
+                      ListTile(
+                        leading: const Text(
+                          'Rating: ',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        trailing: Text(
+                          '${movie.fields.rating} / 5',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        dense: true,
+                      ),
+                      ListTile(
+                        leading: const Text(
+                          'Status: ',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        trailing: Text(
+                          movie.fields.watched ? "Watched" : "Not Watched",
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        dense: true,
+                      ),
+                      ListTile(
+                          title: const Padding(
+                            padding: EdgeInsets.only(bottom: 10.0),
+                            child: Text(
+                              'Review: ',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          dense: true,
+                          subtitle: Text(
+                            movie.fields.review,
+                            style: const TextStyle(
+                                fontSize: 14, color: Colors.black),
+                          )),
+                    ],
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.all(15.0),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        alignment: Alignment.center),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      "Back",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+```
+- pada `lib\page\drawer.dart` tambahkan menu `Watch List` untuk mengarahkan ke page `mywatchlist_page.dart`
+
+```shell
+          ListTile(
+            title: const Text('My Watch List'),
+            onTap: () {
+              // Route menu ke watchlist
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const WatchListPage()),
+              );
+            },
+          ),
+        
+```
 
 <hr>
 ## Getting Started
